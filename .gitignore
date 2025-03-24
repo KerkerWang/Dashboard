@@ -1,0 +1,94 @@
+# -------------- #
+# Visual Studio #
+# -------------- #
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# -------------- #
+# Build         #
+# -------------- #
+bin/
+obj/
+TestResults/
+out/
+*.exe
+*.dll
+*.pdb
+*.cache
+*.ilk
+*.log
+*.scc
+*.bsc
+*.ipch
+
+# -------------- #
+# NuGet         #
+# -------------- #
+*.nupkg
+packages/
+project.lock.json
+project.assets.json
+packages.lock.json
+
+# -------------- #
+# .NET Core     #
+# -------------- #
+!**/bin/Debug/
+!**/bin/Release/
+!**/obj/Debug/
+!**/obj/Release/
+.DS_Store
+.vscode/
+*.pyc
+*.pyo
+*.pyd
+
+# -------------- #
+# Entity Framework #
+# -------------- #
+Migrations/
+*.mdf
+*.ldf
+*.db3
+app.db
+
+# -------------- #
+# Logs & Temp   #
+# -------------- #
+*.log
+*.tlog
+*.tmp
+*.cache
+*.ncrunch*
+*.coverage
+*.testsettings
+*.vspscc
+*.vspcc
+*.userprefs
+tmp/
+
+# -------------- #
+# Rider & ReSharper #
+# -------------- #
+.idea/
+*.DotSettings.user
+*_Resharper.Caches
+
+# -------------- #
+# Code Coverage #
+# -------------- #
+*.coverage
+*.coveragexml
+*.testsettings
+*.runsettings
+*.csproj.user
+
+# -------------- #
+# Deployment    #
+# -------------- #
+publish/
+wwwroot/node_modules/
+wwwroot/lib/
