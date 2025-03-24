@@ -1,19 +1,28 @@
 ﻿import machineRepository from "./machineRepository.js";
 
-let cachedAllMachineData = null; // 記錄 API 回傳資料，避免多次請求
-
 const machineService = {
+    cachedAllMachineData: null,// 記錄 API 回傳資料，避免多次請求
+    fetchPromise: null, // 存儲請求的 Promise，避免重複請求
+
+    async fetchDataOnce() {
+        if (!this.cachedAllMachineData) {
+            if (!this.fetchPromise) {
+                this.fetchPromise = machineRepository.fetchAllMachineData();
+                this.cachedAllMachineData = await this.fetchPromise;
+                this.fetchPromise = null; // 清除 Promise，確保未來可重新請求
+            } else {
+                this.cachedAllMachineData = await this.fetchPromise; // 等待已有的請求完成
+            }
+        }
+    },
+
     //整理資料for pieChart
     async getDataForPieChart() {
-        //確認有資料
-        if (!cachedAllMachineData) {
-            cachedAllMachineData = await machineRepository.fetchAllMachineData();
-        }
-
+        await this.fetchDataOnce();
         //處理資料
         // 篩選 health >= 60 的機器
-        const healthyCount = cachedAllMachineData.filter(machine => machine.values.health >= 60).length;
-        const count = cachedAllMachineData.length;
+        const healthyCount = this.cachedAllMachineData.filter(machine => machine.values.health >= 60).length;
+        const count = this.cachedAllMachineData.length;
 
         let values = [];
         let labels = [];
@@ -60,11 +69,11 @@ const machineService = {
 
     //整理資料for cards
     async getDataForCards() {
-        if (!cachedAllMachineData) {
-            cachedAllMachineData = await machineRepository.fetchAllMachineData();
-        }
+
+        await this.fetchDataOnce();
+
         let dataArr = [];
-        cachedAllMachineData.forEach((machine, index) => {
+        this.cachedAllMachineData.forEach((machine) => {
             let data = {
                 image: machine.image,
                 name: machine.name,
@@ -170,116 +179,3 @@ const machineService = {
 };
 
 export default machineService;
-
-//export class MachineService {
-//    constructor() {
-//        this.machineRepository = MachineRepository;
-//        this.cachedMachines = null; // 快取變數
-//        this.healthyCount = null; //健康機器數量
-//        this.count = null;
-//    }
-
-//    //打api取資料存成員
-//    async getAllMachines() {
-//        if (!this.cachedMachines) {
-//            let machines = await this.machineRepository.getMachines();
-//            if (!machines) return [];
-
-//            this.cachedMachines = machines;
-//            this.healthyCount = machines.filter(machine => machine.values.health >= 60).length;           // 篩選 health >= 60 的機器並快取
-//            this.count = machines.length;
-//        }
-//        return this.cachedMachines;
-//    }
-
-//    //將資料放做成需要格式放到以machineView渲染圓餅圖
-//    async loadPieChart() {
-//        //確認有資料
-//        if (!this.healthyCount) {
-//            await this.getAllMachines();
-//        }
-//        if (!this.count) {
-//            await this.getAllMachines();
-//        }
-//        //處理資料
-//        let values = [];
-//        let labels = [];
-//        let backgroundColor = [];
-//        let borderColor = [];
-//        if (this.healthyCount === 0) {
-//            values = [this.count];
-//            labels = ["bad"];
-//            backgroundColor = ['rgba(54, 162, 235, 0.5)'];
-//            borderColor = ['rgba(54, 162, 235, 0.5)'];
-//        } else if (this.count === this.healthyCount) {
-//            values = [this.healthyCount];
-//            labels = ["good"];
-//            backgroundColor = ['rgba(255, 99, 132, 0.5)'];
-//            borderColor = ['rgba(255, 99, 132, 0.5)'];
-//        } else {
-//            values = [this.count, this.healthyCount];
-//            labels = ["good", "bad"];
-//            backgroundColor = ['rgba(255, 99, 132, 0.5)', 'rgba(54, 162, 235, 0.5)'];
-//            borderColor = ['rgba(255, 99, 132, 0.5)', 'rgba(54, 162, 235, 0.5)'];
-//        }
-//        //設定圖表的資料
-//        var doughnutPieData = {
-//            datasets: [{
-//                data: values,  // 假設 API 回傳的數據是 { values: [1, 1.5, 2] }
-//                /*data: [count],*/
-//                backgroundColor: backgroundColor,
-//                borderColor: borderColor,
-//            }],
-//            labels: labels
-//            //labels: data.labels  // 假設 API 回傳的標籤是 { labels: ["A", "B", "C"] }
-//        };
-//        var doughnutPieOptions = {
-//            responsive: true,
-//            animation: {
-//                animateScale: true,
-//                animateRotate: true
-//            }
-//        };
-
-//        MachineView.drawPieChart(doughnutPieData, doughnutPieOptions);
-//        //if ($("#pieChart").length) {
-//        //    var pieChartCanvas = $("#pieChart").get(0).getContext("2d");
-//        //    var pieChart = new Chart(pieChartCanvas, {
-//        //        type: 'pie',
-//        //        data: doughnutPieData,
-//        //        options: doughnutPieOptions
-//        //    });
-//        //}
-//    }
-
-//    //將資料放做成需要格式放到以machineView渲染機器卡片
-//    async loadCards() {
-//        if (!this.machines) {
-//            await this.getAllMachines();
-//        }
-//        this.machines.forEach((machine, index) => {
-//            const card = document.createElement("div");
-//            card.className = "card mb-3";
-//            card.innerHTML = `
-//                <div class="row g-0">
-//                    <div class="col-md-4">
-//                        <img src="${machine.image}" class="img-fluid rounded-start" alt="${machine.name}">
-//                    </div>
-//                    <div class="col-md-8">
-//                        <div class="card-body">
-//                            <h5 class="card-title">${machine.name}</h5>
-//                                <p class="card-text"><strong>狀態：</strong>${machine.status}</p>
-//                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#machineModal"
-//                                    data-name="${machine.name}"
-//                                    data-image="${machine.image}"
-//                                    data-status="${machine.status}"
-//                                    data-health="${machine.values.health}"
-//                                    data-datetime="${machine.values.datetime}">
-//                                    查看詳情
-//                                </button>
-//                        </div>
-//                    </div>
-//                </div>`;
-//        })
-//    }
-//}

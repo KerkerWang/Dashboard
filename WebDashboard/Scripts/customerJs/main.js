@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("click", function (event) {
     if (event.target.classList.contains("view-details-btn")) {
         const name = event.target.getAttribute("data-name");
-        machineView.renderModal(name.substring(3), event);
+        machineView.renderModal(name.substring(3));
     }
 
     if (event.target.classList.contains("data-update-btn")) {
