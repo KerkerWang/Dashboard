@@ -13,8 +13,8 @@ document.addEventListener("click", function (event) {
     }
 
     if (event.target.classList.contains("data-update-btn")) {
-        console.log(event.target);
         machineView.renderPieChart();
         machineView.renderCards();
+        machineView.renderCounterAndLastUpdateTime();
     }
 });
